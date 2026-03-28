@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doxin Palace - Game Hosting Full Page</title>
+    <style>
+        /* CSS VARIABLES UNTUK TEMA */
+        :root {
+            --bg-main: #060a16;
+            --bg-nav: #0a0f1e;
+            --bg-card: #0e1424;
+            --text-main: white;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+            --sidebar-bg: #0b1120;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-gold: #fbc02d;
+            --accent-red: #ef4444;    /* Performance */
+            --accent-purple: #a855f7; /* Setup */
+        }
+
+        /* TEMA TERANG (LIGHT MODE) */
+        body.light-mode {
+            --bg-main: #ffffff;
+            --bg-nav: #ffffff;
+            --bg-card: #f8fafc;
+            --text-main: #000000;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0; 
+            --sidebar-bg: #ffffff;
+        }
+
+        /* CSS DASAR & RESET */
+        body { margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
+
+        /* --- ANIMASI --- */
+        @keyframes slideInFromTopLeft {
+            0% { opacity: 0; transform: translate(-40px, -20px); filter: blur(5px); }
+            100% { opacity: 1; transform: translate(0, 0); filter: blur(0); }
+        }
+
+        .animate-reveal {
+            opacity: 0;
+            display: block;
+            animation: slideInFromTopLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* NAVBAR */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .logo { font-weight: bold; font-size: 20px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; color: white; }
+        .logo .red-text { color: #ef4444; }
+        .logo-img { width: 32px; height: 32px; object-fit: contain; }
+
+        .theme-toggle { cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color); color: var(--text-muted); }
+
+        /* HERO AREA */
+        #main-hero-area { position: relative; z-index: 10; padding: 40px 15px 30px; background-color: var(--bg-main); }
+        .hero-media-bg { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
+            background-image: 
+                linear-gradient(to right, var(--bg-main) 0%, transparent 40%), 
+                linear-gradient(to left, var(--bg-main) 0%, transparent 40%), 
+                linear-gradient(to top, var(--bg-main) 5%, transparent 50%), 
+                url('https://i.ibb.co.com/fYh6ZNJw/giphy.gif'); 
+            background-size: cover; background-position: center; 
+        }
+        
+        h1 { font-size: 32px; line-height: 1.1; margin: 0 0 10px 0; font-weight: 900; text-transform: uppercase; }
+        .red { color: #ef4444; } .blue { color: #3b82f6; }
+        
+        #features-list { display: flex; flex-direction: column; gap: 4px; } 
+        .feature-item { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--text-main); line-height: 1.2; }
+        .check-icon { 
+            width: 18px; height: 18px; background-color: transparent; border: 1px solid #3b82f6; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            color: #3b82f6; font-size: 10px; font-weight: bold; flex-shrink: 0; margin-top: 0;
+        }
+        
+        .btn-order { display: inline-block; background: #2563eb; color: white; padding: 12px 22px; border-radius: 10px; font-weight: bold; text-decoration: none; margin-top: 15px; text-transform: uppercase; font-size: 14px; }
+
+        /* SIDEBAR */
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; display: none; backdrop-filter: blur(4px); }
+        .sidebar-overlay.active { display: block; }
+        .sidebar { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: var(--sidebar-bg); z-index: 1000; transition: 0.3s ease-in-out; display: flex; flex-direction: column; }
+        .sidebar.active { right: 0; }
+        .sidebar-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { font-size: 28px; cursor: pointer; color: var(--text-main); }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 10px 20px; }
+        .nav-item { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; color: var(--text-main); text-decoration: none; font-size: 18px; font-weight: 700; border-bottom: 1px solid var(--border-color); }
+        .nav-item span.arrow { font-size: 12px; opacity: 0.7; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+        .lang-selector-side { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; color: var(--text-muted); font-size: 14px; cursor: pointer; }
+        .btn-client-area { display: block; width: 100%; background: linear-gradient(90deg, #2563eb, #0ea5e9); color: white; text-align: center; padding: 16px 0; border-radius: 8px; text-decoration: none; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+        .stats-block { background-color: var(--bg-nav); display: flex; align-items: center; justify-content: space-around; padding: 25px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+        .stat-item { text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .stat-divider { width: 1px; height: 35px; background-color: var(--border-color); flex-shrink: 0; }
+        .stat-value { font-size: 20px; font-weight: 900; color: var(--text-main); }
+        .stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
+
+        .cs-widget {
+            position: fixed; bottom: 25px; right: 25px; z-index: 9999; cursor: pointer;
+            width: 60px; height: 60px; background: #2563eb;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+        }
+        .cs-widget svg { width: 30px; height: 30px; fill: white; }
+
+        .popular-games-area { padding: 40px 0; background-color: var(--bg-main); }
+        .game-section-header { padding: 0 20px; margin-bottom: 25px; }
+        .games-available-label { display: inline-flex; align-items: center; gap: 8px; background: rgba(30, 41, 59, 0.1); color: var(--text-muted); border: 1px solid var(--border-color); border-radius: 50px; padding: 8px 15px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; }
+        .game-section-title { font-size: 26px; font-weight: bold; margin: 0; color: var(--text-main); }
+        .game-section-desc { font-size: 14px; color: var(--text-muted); margin-top: 5px; }
+        .games-grid { display: flex; gap: 20px; overflow-x: auto; padding: 0 20px 40px; scrollbar-width: none; }
+        .game-card { flex: 0 0 85%; max-width: 380px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; position: relative; }
+        .game-card-banner-wrap { width: 100%; height: 0; padding-bottom: 56.25%; position: relative; }
+        .game-card-banner { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+        .game-card-info { padding: 20px; background-color: var(--bg-card); position: relative; z-index: 3; }
+        .btn-configure { display: block; width: 100%; background: rgba(16, 185, 129, 0.1); color: var(--text-main); padding: 12px 0; border-radius: 12px; text-align: center; text-decoration: none; font-weight: 700; border: 1px solid var(--border-color); }
+        .available-badge {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(16, 185, 129, 0.1); color: var(--accent-green);
+            border: 1px solid var(--accent-green); padding: 6px 14px; border-radius: 50px;
+            font-size: 11px; font-weight: bold; text-transform: uppercase; z-index: 5; 
+        }
+
+        .card-footer-stats {
+            display: flex; justify-content: space-around; align-items: center; padding: 25px 0;
+            border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); 
+            margin-top: 15px; background-color: var(--bg-nav); 
+        }
+        .quick-stat { display: flex; align-items: center; gap: 12px; flex: 1; justify-content: center; }
+        .qs-divider { width: 1px; height: 30px; background-color: var(--border-color); flex-shrink: 0; }
+        .qs-icon { width: 42px; height: 42px; background: rgba(30, 41, 59, 0.1); border: 1px solid var(--border-color); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #3b82f6; }
+        .qs-text { display: flex; flex-direction: column; }
+        .qs-title { font-size: 16px; font-weight: 800; color: var(--text-main); line-height: 1.1; }
+        .qs-sub { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .why-choose-section { padding: 70px 20px 30px; text-align: center; }
+        .badge-why { display: inline-flex; align-items: center; gap: 4px; background: rgba(30, 41, 59, 0.1); border: 1px solid var(--border-color); padding: 8px 18px; border-radius: 50px; font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 20px; text-transform: uppercase; }
+        .why-main-title { font-size: 38px; font-weight: 900; margin: 0; text-transform: uppercase; line-height: 1.1; color: var(--text-main); }
+        .why-main-desc { font-size: 16px; color: var(--text-muted); margin: 20px auto 0; max-width: 320px; line-height: 1.5; }
+
+        .extra-features-container { padding: 0 20px 50px; display: flex; flex-direction: column; gap: 20px; }
+        .feature-card-box { 
+            position: relative; 
+            background-color: var(--bg-card); 
+            border: 1px solid var(--border-color); 
+            border-radius: 24px; 
+            padding: 30px 25px; 
+            text-align: left; 
+        }
+        .feature-icon-circle { width: 45px; height: 45px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--accent-blue); }
+        .feature-card-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
+        .feature-card-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; }
+        
+        .trust-card-content { display: flex; align-items: flex-start; gap: 15px; }
+        .rating-stars { display: flex; gap: 2px; color: var(--accent-gold); margin: 5px 0; }
+        .rating-score { font-size: 18px; font-weight: 900; margin-right: 5px; color: var(--text-main); }
+
+        .status-bar-wrap { margin-top: 10px; }
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .status-label-small { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .status-indicator { font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .progress-bar { width: 100%; height: 8px; background: #0f172a; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; }
+
+        .instant-label {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* --- STYLES BARU UNTUK CONTROL PANEL & CONSOLE --- */
+        .panel-section { padding: 60px 20px 30px; text-align: center; }
+        .panel-main-title { font-size: 32px; font-weight: 900; margin-bottom: 15px; color: var(--text-main); }
+        .panel-main-desc { font-size: 15px; color: var(--text-muted); max-width: 320px; margin: 0 auto 40px; line-height: 1.6; }
+
+        .console-box-wrap { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; text-align: left; }
+        .console-btn-row { background: rgba(255,255,255,0.03); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .console-btn-title { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15px; }
+        
+        .console-content-padding { padding: 25px 20px; }
+        .console-realtime-title { font-size: 20px; font-weight: 800; margin-bottom: 10px; color: var(--text-main); }
+        
+        .terminal-mockup { background: #070b14; border-radius: 12px; border: 1px solid #1e293b; margin-top: 20px; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        .terminal-header { background: #161b22; padding: 10px 15px; display: flex; gap: 6px; align-items: center; }
+        .dot-term { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-body { padding: 15px; font-size: 13px; line-height: 1.6; color: #e2e8f0; }
+        .term-green { color: #10b981; }
+        .term-blue { color: #3b82f6; }
+
+    </style>
+</head>
+<body>
+
+    <div class="cs-widget">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    </div>
+
+    <nav>
+        <div class="logo">
+            <img src="https://i.ibb.co.com/x8SyZcfM/IMG-20260328-WA0003-jukebox-bg-removed.png" alt="Doxin Palace Logo" class="logo-img">
+            <span class="red-text">Doxin</span> Palace
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                <svg id="theme-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </div>
+            <div onclick="switchLang()" style="cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 6px; color: var(--text-muted)"><img class="nav-flag" src="https://flagcdn.com/w40/id.png" style="width:22px; border-radius: 2px;"><span class="nav-lang-code">ID</span><span>▼</span></div>
+            <div onclick="toggleSidebar()" style="font-size: 28px; cursor: pointer; color: var(--text-main);">☰</div>
+        </div>
+    </nav>
+
+    <div id="main-hero-area">
+        <div class="hero-media-bg"></div>
+        <div id="hero-animated-wrap">
+            <h1 id="headline"></h1>
+            <div id="features-list"></div>
+        </div>
+        <a href="#" class="btn-order" id="btn-text"></a>
+    </div>
+
+    <div class="stats-block">
+        <div class="stat-item"><div class="stat-value">99.9%</div><div class="stat-label" id="label-uptime"></div></div>
+        <div class="stat-divider"></div>
+        <div class="stat-item"><div class="stat-value">1200+</div><div class="stat-label" id="label-server"></div></div>
+        <div class="stat-divider"></div>
+        <div class="stat-item"><div class="stat-value">< 5m</div><div class="stat-label" id="label-support"></div></div>
+    </div>
+
+    <div class="popular-games-area">
+        <div class="game-section-header">
+            <div class="games-available-label" id="avail-games"></div>
+            <h2 class="game-section-title" id="footer-title"></h2>
+            <p class="game-section-desc" id="footer-desc"></p>
+        </div>
+        
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-card-banner-wrap">
+                    <div class="available-badge">Available</div>
+                    <img src="https://i.ibb.co.com/YF7Z0xXV/images-13.jpg" class="game-card-banner">
+                </div>
+                <div class="game-card-info">
+                    <h3 style="margin:0">Minecraft</h3>
+                    <p id="desc-mc" style="font-size:13px; color:var(--text-muted); margin: 10px 0 15px 0;"></p>
+                    <a href="#" class="btn-configure" id="btn-conf-mc"></a>
+                </div>
+            </div>
+            <div class="game-card">
+                <div class="game-card-banner-wrap">
+                    <div class="available-badge">Available</div>
+                    <img src="https://i.ibb.co.com/pBGR0RHV/images-14.jpg" class="game-card-banner">
+                </div>
+                <div class="game-card-info">
+                    <h3 style="margin:0">Hytale</h3>
+                    <p id="desc-ht" style="font-size:13px; color:var(--text-muted); margin: 10px 0 15px 0;"></p>
+                    <a href="#" class="btn-configure" id="btn-conf-ht"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer-stats">
+            <div class="quick-stat">
+                <div class="qs-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div class="qs-text"><span class="qs-title">Instant</span><span class="qs-sub">Deploy</span></div>
+            </div>
+            <div class="qs-divider"></div>
+            <div class="quick-stat">
+                <div class="qs-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <div class="qs-text"><span class="qs-title">1.2K+</span><span class="qs-sub">Servers</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="why-choose-section">
+        <div class="badge-why">⭐ Why Choose <span style="color:#ef4444; margin-left:4px;">Doxin</span> <span style="color:white;">Palace</span>?</div>
+        <h2 class="why-main-title">Why Choose<br><span class="red">Doxin</span> Palace?</h2>
+        <p class="why-main-desc" id="why-desc-text"></p>
+    </div>
+
+    <div class="extra-features-container">
+        
+        <div class="feature-card-box">
+            <div class="feature-icon-circle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <div class="feature-card-title">24/7 Expert Support</div>
+            <div class="feature-card-desc" id="desc-expert-support"></div>
+            <div class="status-bar-wrap">
+                <div class="status-header">
+                    <span class="status-label-small">Support Status</span>
+                    <span class="status-indicator" style="color: var(--accent-green)"><span class="dot" style="background: var(--accent-green)"></span> Online</span>
+                </div
